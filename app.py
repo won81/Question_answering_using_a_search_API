@@ -33,10 +33,10 @@ session.cookies.set("__Secure-1PSID", st.session_state.psid)
 session.cookies.set("__Secure-1PSIDTS", st.session_state.psidts)
 session.cookies.set("__Secure-1PSIDCC", st.session_state.psidcc)
 
+import browser_cookie3
 
 def get_question_queries(payload):
-    # bard = Bard(token=st.session_state.psid, session=session)
-    bard = Bard(token_from_browser=True)
+    bard = Bard(token=st.session_state.psid, session=session)
     prompt = '\
             {"role": "system", "content": "Output only valid JSON"},\
             {"role": "user", "content": "\
