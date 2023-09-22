@@ -27,10 +27,10 @@ if 'psidcc' not in st.session_state:
 if 'news_api_key' not in st.session_state:
     st.session_state['news_api_key'] = ''
 
-st.session_state['psid'] = st.text_input('1PSID: ', st.session_state['psid'])
-st.session_state['psidts'] = st.text_input('1PSIDTS: ', st.session_state['psidts'])
-st.session_state['psidcc'] = st.text_input('1PSIDCC: ', st.session_state['psidcc'])
-st.session_state['news_api_key'] = st.text_input('NEWS API KEY: ', st.session_state['news_api_key'])
+st.session_state['psid'] = st.text_input('1PSID: ', st.session_state['psid'], type = "password")
+st.session_state['psidts'] = st.text_input('1PSIDTS: ', st.session_state['psidts'], type = "password")
+st.session_state['psidcc'] = st.text_input('1PSIDCC: ', st.session_state['psidcc'], type = "password")
+st.session_state['news_api_key'] = st.text_input('NEWS API KEY: ', st.session_state['news_api_key'], type = "password")
 
 session = requests.Session()
 session.headers = SESSION_HEADERS
@@ -43,27 +43,28 @@ import browser_cookie3
 def get_question_queries(payload):
     bard = Bard(token=st.session_state.psid, session=session)
     prompt = '\
-            {"role": "system", "content": "Output only valid JSON"},\
-            {"role": "user", "content": "\
-            You have access to a search API that returns recent news articles. \
-            If you know the date involved in the question, please change it to yyyy-mm-dd format. \
-            Generate an array of search queries that are relevant to this question. \
-            Use a variation of related keywords for the queries, trying to be as general as possible. \
-            Include as many queries as you can think of, including and excluding terms. \
-            When creating queries, remove words that refer to datetime like yesterday, today, days, and month. \
-            Make the query an English word. \
-            For example, include queries like [\'keyword_1 keyword_2\', \'keyword_1\', \'keyword_2\']. \
-            Be creative. The more queries you include, the more likely you are to find relevant results.\
-            User question: ' + payload + '\
-            Format: {{"queries": ["query_1", "query_2", "query_3"], "date": {"from": "yyyy-mm-dd", "to": "yyyy-mm-dd"}}}'
+{\\"role\\": \\"system\\", \\"content\\": \\"Output only valid JSON\\"},\
+{\\"role\\": \\"user\\", \\"content\\": \\"You can access a search API that returns recent news articles.\
+1. If the question is not in English, please translate it into English.\
+2. If the question includes dates, please change them to yyyy-mm-dd format. When responding, please change the date information as follows: {\\"date\\": [\\"from_datetime\\", \\"to_datetime\\"]}\
+3. Generates an array of search terms related to this question, excluding words in the format yyyy-mm-dd or date information (such as days, yesterday, month, etc.). Search as generally as possible and use a variety of relevant keywords. Include as many search terms as you can think of, including or excluding them. Please write keywords used in queries only in English.\
+For example, include search terms like [\\"keyword_1 keyword_2\\", \\"keyword_1\\", \\"keyword_2\\"].\
+Be creative. The more search terms you include, the more likely you are to find relevant results.\
+\
+User question: ' + payload + '\
+Format: {{\\"queries\\": [\\"query_1\\", \\"query_2\\", \\"query_3\\"], \\"date\\": [\\"yyyy-mm-dd\\", \\"yyyy-mm-dd\\"]}}'
 
+    # print(prompt)
     response = bard.get_answer(prompt)
     return response
 
 def get_json(json_string):
+    # print(json_string)
     json_string = json_string.replace('\n', ' ')
     result = re.search('```json(.*)```', json_string)
-    return json.loads(result.group(1))
+    if result:
+        return json.loads(result.group(1))
+    return json.loads("{}")
 
 with st.form('form', clear_on_submit = True):
     user_input = st.text_input('Message: ', '')
@@ -93,12 +94,12 @@ if submitted and user_input:
     output = get_question_queries(user_input)
     json_object = get_json(output['content'])
     queries = json_object['queries']
-    dates = json_object['date']
+    datetime = json_object['date']
 
     articles = []
 
     # for query in queries:
-    result = search_news(queries[0], from_datetime = dates["from"], to_datetime = dates["to"])
+    result = search_news(queries[0], from_datetime = datetime[0], to_datetime = datetime[1])
     if result["status"] == "ok":
         articles = articles + result["articles"]
     else:
