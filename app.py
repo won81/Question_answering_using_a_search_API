@@ -6,7 +6,7 @@ from bardapi.constants import SESSION_HEADERS
 from bardapi import Bard
 from streamlit_chat import message
 
-st.header('Bard 를 이용한 QA (구현 중)')
+st.header('Bard와 Newsapi를 이용한 뉴스 검색 서비스')
 st.markdown("[Detailed explanation](https://wide-shallow.tistory.com/)")
 
 if 'generated_responses' not in st.session_state:
