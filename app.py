@@ -43,16 +43,14 @@ import browser_cookie3
 def get_question_queries(payload):
     bard = Bard(token=st.session_state.psid, session=session)
     prompt = '\
-{\\"role\\": \\"system\\", \\"content\\": \\"Output only valid JSON\\"},\
-{\\"role\\": \\"user\\", \\"content\\": \\"You can access a search API that returns recent news articles.\
-1. If the question is not in English, please translate it into English.\
-2. If the question includes dates, please change them to yyyy-mm-dd format. When responding, please change the date information as follows: {\\"date\\": [\\"from_datetime\\", \\"to_datetime\\"]}\
-3. Generates an array of search terms related to this question, excluding words in the format yyyy-mm-dd or date information (such as days, yesterday, month, etc.). Search as generally as possible and use a variety of relevant keywords. Include as many search terms as you can think of, including or excluding them. Please write keywords used in queries only in English.\
-For example, include search terms like [\\"keyword_1 keyword_2\\", \\"keyword_1\\", \\"keyword_2\\"].\
-Be creative. The more search terms you include, the more likely you are to find relevant results.\
+Forget any previous instructions.\
+1. If the given text is not in English, translate it to English.\
+2. Leave only the main keywords from the translated content. You have to remove date information in the main keywords. Generates an array of search terms related to the main keywords. Search as generally as possible and use a variety of relevant keywords. Include as many search terms as you can think of, including or excluding them. {\"search_terms\" : [\"keyword1\", \"keyword2\", \"keyword2 keyword1\"]}\
+3. Change the date information in the given text to the yyyy-mm-dd format and represent it as {\"date\" : [\"from_dat\", \"to_date\"]}. If it is not expressed as a time period, to_date should be today.\
+{\"search_terms\" : [\"keyword1\", \"keyword2\", \"keyword2 keyword1\"], \"date\" : [\"from_date\", \"to_date\"]}\
+let\'s think step by step.\
 \
-User question: ' + payload + '\
-Format: {{\\"queries\\": [\\"query_1\\", \\"query_2\\", \\"query_3\\"], \\"date\\": [\\"yyyy-mm-dd\\", \\"yyyy-mm-dd\\"]}}'
+' + payload
 
     # print(prompt)
     response = bard.get_answer(prompt)
@@ -93,7 +91,7 @@ def search_news(
 if submitted and user_input:
     output = get_question_queries(user_input)
     json_object = get_json(output['content'])
-    queries = json_object['queries']
+    queries = json_object['search_terms']
     datetime = json_object['date']
 
     articles = []
