@@ -1,19 +1,13 @@
-import re
 import json
+import pandas as pd
+import re
 import requests
 import streamlit as st
 from bardapi.constants import SESSION_HEADERS
 from bardapi import Bard
-from streamlit_chat import message
 
 st.header('Bard와 Newsapi를 이용한 뉴스 검색 서비스')
-st.markdown("[Detailed explanation](https://wide-shallow.tistory.com/)")
-
-if 'generated_responses' not in st.session_state:
-    st.session_state['generated_responses'] = []
-
-if 'user_inputs' not in st.session_state:
-    st.session_state['user_inputs'] = []
+st.markdown("[Detailed explanation](https://wide-shallow.tistory.com/entry/QA-using-a-search-API)")
 
 if 'psid' not in st.session_state:
     st.session_state['psid'] = ''
@@ -52,12 +46,10 @@ let\'s think step by step.\
 \
 ' + payload
 
-    # print(prompt)
     response = bard.get_answer(prompt)
     return response
 
 def get_json(json_string):
-    # print(json_string)
     json_string = json_string.replace('\n', ' ')
     result = re.search('```json(.*)```', json_string)
     if result:
@@ -111,11 +103,6 @@ if submitted and user_input:
         generated_text += "Description: " + article["description"] + "\n"
         generated_text += "Content: " + article["content"][0:100] + "\n\n\n"
 
-    st.session_state.user_inputs.append(user_input)
-    st.session_state.generated_responses.append(generated_text)
-
-if st.session_state['generated_responses']:
-    index = len(st.session_state['generated_responses']) - 1
-    message(st.session_state['user_inputs'][index], is_user = True, key=str(index) + '_user')
-    message(st.session_state['generated_responses'][index], key=str(index))
+    st.write(':question:    ' + user_input)
+    st.write(':100:         ' + generated_text)
 
