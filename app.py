@@ -6,7 +6,7 @@ import streamlit as st
 from bardapi.constants import SESSION_HEADERS
 from bardapi import Bard
 
-st.header('Bard와 Newsapi를 이용한 뉴스 검색 서비스')
+st.header('Bard와 NewsAPI를 이용한 뉴스 검색 서비스')
 st.markdown("[Detailed explanation](https://wide-shallow.tistory.com/entry/QA-using-a-search-API)")
 
 if 'psid' not in st.session_state:
